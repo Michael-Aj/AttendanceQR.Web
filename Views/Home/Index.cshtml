@@ -1,0 +1,119 @@
+@{
+    ViewData["Title"] = "Home";
+    var latestId = ViewBag.LatestSessionId as int?;
+    var latestLabel = ViewBag.LatestSessionLabel as string ?? "No sessions yet";
+}
+
+<!-- Hero Card -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div>
+                <h1 class="h3 mb-2">QR Class Attendance <span class="text-muted">(Sessions)</span></h1>
+                <p class="lead mb-0">
+                    Use
+                    <a class="link-primary fw-semibold" asp-controller="Sessions" asp-action="Create">
+                        Create Session
+                    </a>
+                    to generate a QR for students to scan.
+                </p>
+            </div>
+            <div class="text-end">
+                <img src="~/img/stadio-logo.png"
+                     alt="STADIO"
+                     class="img-fluid"
+                     style="max-height:56px; object-fit:contain;" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats (optional) -->
+<div class="row g-3 mb-3">
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-uppercase small text-muted">Latest Session</div>
+                        <div class="fw-semibold">@latestLabel</div>
+                    </div>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Live</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dashboard Cards -->
+<div class="row g-3">
+    <!-- Downloads -->
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+                <h5 class="card-title mb-1">Downloads</h5>
+                <p class="text-muted mb-3">Quick access to templates and latest export.</p>
+
+                <div class="d-flex flex-wrap gap-2">
+                    <a class="btn btn-outline-secondary"
+                       asp-controller="Sessions" asp-action="DownloadTemplate">
+                        <i class="bi bi-filetype-xlsx me-1"></i> Download Template
+                    </a>
+
+                    @if (latestId.HasValue)
+                    {
+                        <a class="btn btn-primary"
+                           asp-controller="Sessions" asp-action="Export" asp-route-id="@latestId">
+                            <i class="bi bi-download me-1"></i> Download Excel (Latest)
+                        </a>
+                    }
+                    else
+                    {
+                        <button class="btn btn-primary" disabled>
+                            <i class="bi bi-download me-1"></i> Download Excel (Latest)
+                        </button>
+                    }
+                </div>
+
+                <div class="small text-muted mt-2">
+                    @if (latestId.HasValue)
+                    {
+                        <span>Latest: @latestLabel</span>
+                    }
+                    else
+                    {
+                        <span>No session available yet.</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manage Sessions -->
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+                <h5 class="card-title mb-1">Manage Sessions</h5>
+                <p class="text-muted mb-3">Create a QR or view previous sessions.</p>
+
+                <div class="d-flex flex-wrap gap-2">
+                    <a class="btn btn-success"
+                       asp-controller="Sessions" asp-action="Create">
+                        <i class="bi bi-qr-code me-1"></i> Create Session (QR)
+                    </a>
+
+                    <a class="btn btn-outline-dark"
+                       asp-controller="Sessions" asp-action="List">
+                        <i class="bi bi-table me-1"></i> View All Sessions
+                    </a>
+
+                    <a class="btn btn-outline-secondary"
+                       asp-controller="Sessions" asp-action="CompareModule">
+                        <i class="bi bi-diagram-3 me-1"></i> Compare by Module
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

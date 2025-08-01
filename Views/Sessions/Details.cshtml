@@ -1,0 +1,38 @@
+@model AttendanceQR.Web.Domain.Entities.ClassSession
+@{
+    ViewData["Title"] = "Session Details";
+}
+<h2>Session Details</h2>
+<p><strong>@Model.SessionId</strong></p>
+@if (!string.IsNullOrWhiteSpace(Model.QrUrl))
+{
+    <p>QR URL: <code>@Model.QrUrl</code></p>
+}
+<h4>Records</h4>
+@if (Model.AttendanceRecords == null || !Model.AttendanceRecords.Any())
+{
+    <p>No attendance captured yet.</p>
+}
+else
+{
+    <table class="table table-sm">
+      <thead><tr><th>Student</th><th>Status</th><th>CapturedAt (UTC)</th></tr></thead>
+      <tbody>
+        @foreach (var r in Model.AttendanceRecords)
+        {
+            <tr>
+              <td>@r.StudentNumber</td>
+              <td>@r.Status</td>
+              <td>@r.CapturedAtUtc</td>
+            </tr>
+        }
+      </tbody>
+    </table>
+}
+<a class="btn btn-outline-primary"
+   asp-controller="Sessions"
+   asp-action="Export"
+   asp-route-id="@Model.Id">
+    Download Excel
+</a>
+<a asp-controller="Sessions" asp-action="DownloadTemplate">Download Template</a>

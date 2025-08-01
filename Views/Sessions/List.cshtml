@@ -1,0 +1,48 @@
+﻿@model IEnumerable<AttendanceQR.Web.ViewModels.SessionRowVm>
+@{
+    ViewData["Title"] = "Sessions";
+}
+
+<h2>Sessions</h2>
+<table class="table table-striped table-sm align-middle">
+  <thead>
+    <tr>
+      <th>Session</th>
+      <th>Module</th>
+      <th>Venue</th>
+      <th>Date</th>
+      <th>Start</th>
+      <th>Records</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+        @foreach (var s in Model)
+        {
+        <tr>
+          <td>@s.SessionId</td>
+          <td>@s.ModuleCode</td>
+          <td>@s.VenueCode</td>
+          <td>@s.ClassDate</td>
+          <td>@s.StartTime</td>
+          <td>@s.Count</td>
+          <td class="text-nowrap">
+            <a class="btn btn-outline-primary btn-sm"
+               asp-controller="Sessions" asp-action="Export" asp-route-id="@s.Id">
+              Download Excel
+            </a>
+            <a class="btn btn-outline-secondary btn-sm ms-1"
+               asp-controller="Sessions" asp-action="Details" asp-route-id="@s.Id">
+              Details
+            </a>
+
+                    <a class="btn btn-outline-secondary btn-sm ms-1"
+                       asp-controller="Sessions" asp-action="CompareModule">
+                        Compare by Module
+                    </a>
+
+          </td>
+        </tr>
+        }
+  </tbody>
+</table>

@@ -1,0 +1,114 @@
+@model AttendanceQR.Web.ViewModels.CreateSessionVm
+@{
+    ViewData["Title"] = "Create Session";
+}
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+            <div>
+                <h2 class="h4 mb-1">Create Session & Download QR</h2>
+                <p class="text-muted mb-0">Fill in the details and submit to download a PNG QR code for this class session.</p>
+            </div>
+            <span class="badge text-bg-light border">QR will embed session, module, venue & time</span>
+        </div>
+
+        <form method="post" class="row g-3" id="createSessionForm">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+            <!-- Module -->
+            <div class="col-md-4">
+                <label class="form-label">Module Code</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                    <input asp-for="ModuleCode" class="form-control text-uppercase" placeholder="e.g., ISP152" required />
+                </div>
+                <div class="form-text">Use official code (auto-uppercased).</div>
+                <span asp-validation-for="ModuleCode" class="text-danger"></span>
+            </div>
+
+            <!-- Venue -->
+            <div class="col-md-4">
+                <label class="form-label">Venue Code</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                    <input asp-for="VenueCode" class="form-control text-uppercase" placeholder="e.g., CEN-101" required />
+                </div>
+                <div class="form-text">Room or lab code (auto-uppercased).</div>
+                <span asp-validation-for="VenueCode" class="text-danger"></span>
+            </div>
+
+            <!-- Date -->
+            <div class="col-md-4">
+                <label class="form-label">Class Date</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-calendar-date"></i></span>
+                    <input asp-for="ClassDate" type="date" class="form-control" required />
+                </div>
+                <span asp-validation-for="ClassDate" class="text-danger"></span>
+            </div>
+
+            <!-- Start -->
+            <div class="col-md-4">
+                <label class="form-label">Start Time</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-clock"></i></span>
+                    <input asp-for="StartTime" type="time" class="form-control" required />
+                </div>
+                <span asp-validation-for="StartTime" class="text-danger"></span>
+            </div>
+
+            <!-- End -->
+            <div class="col-md-4">
+                <label class="form-label">End Time <span class="text-muted">(optional)</span></label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-clock-history"></i></span>
+                    <input asp-for="EndTime" type="time" class="form-control" />
+                </div>
+                <span asp-validation-for="EndTime" class="text-danger"></span>
+            </div>
+
+            <!-- Actions -->
+            <div class="col-12 d-flex gap-2">
+                <button type="submit" class="btn btn-success" id="submitBtn">
+                    <span class="spinner-border spinner-border-sm me-2 d-none" id="submitSpinner" role="status" aria-hidden="true"></span>
+                    Create & Download QR
+                </button>
+                <a class="btn btn-outline-secondary" asp-controller="Sessions" asp-action="List">
+                    <i class="bi bi-table me-1"></i> View Sessions
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Auto-uppercase for module & venue inputs (keeps caret position)
+        (function () {
+          const toUpper = (el) => {
+            const start = el.selectionStart, end = el.selectionEnd;
+            el.value = el.value.toUpperCase();
+            el.setSelectionRange(start, end);
+          };
+          const mod = document.getElementById("ModuleCode") || document.querySelector('[name="ModuleCode"]');
+          const ven = document.getElementById("VenueCode") || document.querySelector('[name="VenueCode"]');
+          mod && mod.addEventListener("input", () => toUpper(mod));
+          ven && ven.addEventListener("input", () => toUpper(ven));
+        })();
+
+        // Disable submit & show spinner to prevent double posts
+        (function () {
+          const form = document.getElementById("createSessionForm");
+          const btn = document.getElementById("submitBtn");
+          const spin = document.getElementById("submitSpinner");
+          form?.addEventListener("submit", () => {
+            btn?.setAttribute("disabled", "disabled");
+            spin?.classList.remove("d-none");
+          });
+        })();
+    </script>
+}

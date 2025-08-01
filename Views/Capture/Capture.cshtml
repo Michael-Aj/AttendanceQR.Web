@@ -1,0 +1,37 @@
+@model AttendanceQR.Web.ViewModels.CaptureVm
+@{
+    ViewData["Title"] = "Class Attendance";
+}
+<h2>Scan & Check‑in</h2>
+<form asp-action="Submit" method="post" class="mt-3">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="SessionId" value="@Model.SessionId" />
+    <input type="hidden" name="ModuleCode" value="@Model.ModuleCode" />
+    <input type="hidden" name="Venue" value="@Model.Venue" />
+    <input type="hidden" name="ClassDate" value="@Model.ClassDate" />
+    <input type="hidden" name="StartTime" value="@Model.StartTime" />
+    <input type="hidden" name="Nonce" value="@Model.Nonce" />
+
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Student Number</label>
+        <input name="StudentNumber" class="form-control" required />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">First Name</label>
+        <input name="FirstName" class="form-control" required />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Last Name</label>
+        <input name="LastName" class="form-control" required />
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Programme</label>
+        <input name="Programme" class="form-control" required />
+      </div>
+    </div>
+
+    <div class="mt-3">
+      <button class="btn btn-primary" type="submit">Submit</button>
+    </div>
+</form>

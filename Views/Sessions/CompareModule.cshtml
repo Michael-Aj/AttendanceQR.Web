@@ -1,0 +1,112 @@
+﻿@model AttendanceQR.Web.ViewModels.ModuleCompareVm
+@{
+    ViewData["Title"] = "Compare Module Roster";
+}
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+            <div>
+                <h2 class="h4 mb-1">Compare roster with module attendance</h2>
+                <p class="text-muted mb-0">Upload a class list (CSV/XLSX), choose module and optional date range, then generate an absentees report.</p>
+            </div>
+            <a class="btn btn-outline-secondary btn-sm" asp-controller="Sessions" asp-action="DownloadTemplate">
+                <i class="bi bi-filetype-xlsx me-1"></i> Download Template
+            </a>
+        </div>
+
+        <form asp-action="CompareModule" method="post" enctype="multipart/form-data" class="row g-3" id="compareModuleForm">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger d-none" id="valSummary"></div>
+
+            <!-- Module Code -->
+            <div class="col-md-4">
+                <label class="form-label">Module Code</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                    <input asp-for="ModuleCode" class="form-control text-uppercase" placeholder="e.g., ISP152" required />
+                </div>
+                <div class="form-text">Use the official module code (auto-uppercased).</div>
+                <span asp-validation-for="ModuleCode" class="text-danger"></span>
+            </div>
+
+            <!-- From -->
+            <div class="col-md-3">
+                <label class="form-label">From (optional)</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-calendar-date"></i></span>
+                    <input asp-for="FromDate" type="date" class="form-control" />
+                </div>
+            </div>
+
+            <!-- To -->
+            <div class="col-md-3">
+                <label class="form-label">To (optional)</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-calendar2-week"></i></span>
+                    <input asp-for="ToDate" type="date" class="form-control" />
+                </div>
+            </div>
+
+            <!-- Roster file -->
+            <div class="col-md-6">
+                <label class="form-label">Upload roster (.xlsx or .csv)</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-upload"></i></span>
+                    <input type="file" name="rosterFile" class="form-control" accept=".xlsx,.csv" required />
+                </div>
+                <div class="form-text">Required column: <strong>Student Number</strong>. Optional: First/Last Name, Programme, Module.</div>
+            </div>
+
+            <!-- Actions -->
+            <div class="col-12 d-flex flex-wrap gap-2">
+                <button class="btn btn-primary" type="submit" id="submitBtn">
+                    <span class="spinner-border spinner-border-sm me-2 d-none" id="submitSpinner" role="status" aria-hidden="true"></span>
+                    Compare
+                </button>
+                <a class="btn btn-outline-dark" asp-controller="Sessions" asp-action="List">
+                    <i class="bi bi-table me-1"></i> View Sessions
+                </a>
+                <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-house-door me-1"></i> Dashboard
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Show validation summary if there are model errors
+        (function () {
+          const summary = document.getElementById("valSummary");
+          if (summary && summary.querySelectorAll("li").length > 0) {
+            summary.classList.remove("d-none");
+          }
+        })();
+
+        // Auto-uppercase module code while preserving caret
+        (function () {
+          const mod = document.getElementById("ModuleCode") || document.querySelector('[name="ModuleCode"]');
+          if (!mod) return;
+          mod.addEventListener("input", () => {
+            const s = mod.selectionStart, e = mod.selectionEnd;
+            mod.value = mod.value.toUpperCase();
+            mod.setSelectionRange(s, e);
+          });
+        })();
+
+        // Prevent double submit & show spinner
+        (function () {
+          const form = document.getElementById("compareModuleForm");
+          const btn = document.getElementById("submitBtn");
+          const spin = document.getElementById("submitSpinner");
+          form?.addEventListener("submit", () => {
+            btn?.setAttribute("disabled", "disabled");
+            spin?.classList.remove("d-none");
+          });
+        })();
+    </script>
+}
