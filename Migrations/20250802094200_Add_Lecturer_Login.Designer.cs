@@ -3,6 +3,7 @@ using System;
 using AttendanceQR.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AttendanceQR.Web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250802094200_Add_Lecturer_Login")]
+    partial class Add_Lecturer_Login
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.7");
@@ -131,7 +134,7 @@ namespace AttendanceQR.Web.Migrations
                     b.HasIndex("StaffEmail", "TokenHash")
                         .IsUnique();
 
-                    b.ToTable("EmailSignInTokens");
+                    b.ToTable("EmailSignInToken");
                 });
 
             modelBuilder.Entity("AttendanceQR.Web.Domain.Entities.Lecturer", b =>
@@ -153,7 +156,7 @@ namespace AttendanceQR.Web.Migrations
 
                     b.HasKey("StaffEmail");
 
-                    b.ToTable("Lecturers");
+                    b.ToTable("Lecturer");
                 });
 
             modelBuilder.Entity("AttendanceQR.Web.Domain.Entities.Module", b =>

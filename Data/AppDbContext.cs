@@ -10,6 +10,8 @@ namespace AttendanceQR.Web.Data
         public DbSet<Venue> Venues => Set<Venue>();
         public DbSet<ClassSession> ClassSessions => Set<ClassSession>();
         public DbSet<AttendanceRecord> AttendanceRecords => Set<AttendanceRecord>();
+        public DbSet<Lecturer> Lecturers => Set<Lecturer>();
+        public DbSet<EmailSignInToken> EmailSignInTokens => Set<EmailSignInToken>();
 
         protected override void OnModelCreating(ModelBuilder b)
         {
@@ -56,7 +58,13 @@ namespace AttendanceQR.Web.Data
                 .WithMany(s => s.AttendanceRecords)
                 .HasForeignKey(a => a.StudentNumber)
                 .OnDelete(DeleteBehavior.Restrict);
-        }
+
+            b.Entity<Lecturer>().HasKey(x => x.StaffEmail);
+            b.Entity<Lecturer>().Property(x => x.StaffEmail).ValueGeneratedNever();
+
+            b.Entity<EmailSignInToken>().HasIndex(x => new { x.StaffEmail, x.TokenHash }).IsUnique();
+        
+    }
     }
     
     }

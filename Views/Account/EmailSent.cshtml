@@ -1,0 +1,19 @@
+﻿@{
+    ViewData["Title"] = "Check your email";
+    var email = ViewBag.Email as string ?? "";
+    var devLink = ViewBag.DevLink as string;
+}
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+        <h2 class="h5 mb-2">Check your inbox</h2>
+        <p>We sent a sign-in link to <strong>@email</strong>.</p>
+        @if (!string.IsNullOrWhiteSpace(devLink))
+        {
+            <div class="alert alert-info">
+                <div class="fw-semibold mb-1">Development shortcut</div>
+                <a href="@devLink" class="text-break">@devLink</a>
+            </div>
+        }
+        <a class="btn btn-outline-secondary" asp-action="Register">Back</a>
+    </div>
+</div>

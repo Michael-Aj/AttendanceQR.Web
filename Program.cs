@@ -2,8 +2,11 @@ using AttendanceQR.Web.Data;
 using AttendanceQR.Web.Domain.Entities;
 using AttendanceQR.Web.Services;
 using AttendanceQR.Web.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,7 +25,32 @@ builder.Services.AddDbContext<AppDbContext>(o => o.UseSqlite(conn));
 //builder.Services.AddDbContext<AppDbContext>(opt =>
 //    opt.UseSqlite($"Data Source={dbPath}"));
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(o =>
+    {
+        o.LoginPath = "/Account/Register";
+        o.AccessDeniedPath = "/Account/Register";
+        o.SlidingExpiration = true;
+    });
+//builder.Services.AddAuthorization();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("LecturerOnly",
+        p => p.RequireAuthenticatedUser().RequireRole("Lecturer"));
+});
+
+builder.Services.AddControllersWithViews(options =>
+{
+    // Require LecturerOnly everywhere by default
+    options.Filters.Add(new AuthorizeFilter("LecturerOnly"));
+});
+
+builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
+builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
+builder.Services.AddScoped<IRegistrationService, RegistrationService>();
+
+//builder.Services.AddControllersWithViews();
 
 builder.Services.Configure<FormOptions>(o =>
 {
@@ -52,8 +80,8 @@ using (var scope = app.Services.CreateScope())
     if (!await db.Venues.AnyAsync())
     {
         db.Venues.AddRange(
-            new Venue { Code = "CEN-101", Name = "Centurion 101" },
-            new Venue { Code = "LAB-01", Name = "Main Lab" }
+            new Venue { Code = "BL-7", Name = "Centurion 101" },
+            new Venue { Code = "BL-13.2", Name = "Main Lab" }
         );
     }
     await db.SaveChangesAsync();
@@ -76,6 +104,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
