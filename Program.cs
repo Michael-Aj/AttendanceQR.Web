@@ -5,21 +5,40 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Connection string from env (Render -> Env Vars) or fallback
+//// Connection string from env (Render -> Env Vars) or fallback
+//var conn = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
+//          ?? builder.Configuration.GetConnectionString("DefaultConnection")
+//          ?? "Data Source=/var/data/attendance.db";
+
+//// Ensure DB directory exists (works for SQLite file paths)
+//string dataSource;
+//try { dataSource = new SqliteConnectionStringBuilder(conn).DataSource; }
+//catch { dataSource = conn.Replace("Data Source=", "", StringComparison.OrdinalIgnoreCase).Trim(); }
+//var dir = Path.GetDirectoryName(Path.GetFullPath(dataSource));
+//if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
+
+//builder.Services.AddDbContext<AppDbContext>(o =>
+//    o.UseSqlite(conn)  // keep .EnableSensitiveDataLogging() OFF in prod
+//);
 var conn = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
           ?? builder.Configuration.GetConnectionString("DefaultConnection")
-          ?? "Data Source=/var/attendance/attendance.db";
+          ?? "Data Source=./data/attendance.db";
 
-// Ensure DB directory exists (works for SQLite file paths)
-string dataSource;
-try { dataSource = new SqliteConnectionStringBuilder(conn).DataSource; }
-catch { dataSource = conn.Replace("Data Source=", "", StringComparison.OrdinalIgnoreCase).Trim(); }
-var dir = Path.GetDirectoryName(Path.GetFullPath(dataSource));
-if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
+var csb = new SqliteConnectionStringBuilder(conn);
+var dataSource = Path.GetFullPath(csb.DataSource);
+var dir = Path.GetDirectoryName(dataSource)!;
 
-builder.Services.AddDbContext<AppDbContext>(o =>
-    o.UseSqlite(conn)  // keep .EnableSensitiveDataLogging() OFF in prod
-);
+// Only try to create if it's under a known-writable location
+if (!Directory.Exists(dir))
+{
+    if (dir.StartsWith("/var/attendance") || !Path.IsPathRooted(dir))
+        Directory.CreateDirectory(dir);
+    else
+        throw new InvalidOperationException(
+            $"DB dir '{dir}' is not writable. Use /var/attendance on Render.");
+}
+
+builder.Services.AddDbContext<AppDbContext>(o => o.UseSqlite(conn));
 
 // Auth (cookie)
 builder.Services.AddAuthentication("Cookies")
