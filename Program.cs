@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Connection string from env (Render -> Env Vars) or fallback
 var conn = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
           ?? builder.Configuration.GetConnectionString("DefaultConnection")
-          ?? "Data Source=/var/attendance/attendance.db";
+          ?? "Data Source=/var/data/attendance.db";
 
 // Ensure DB directory exists (works for SQLite file paths)
 string dataSource;
