@@ -1,5 +1,10 @@
 using AttendanceQR.Web.Data;
+using AttendanceQR.Web.Services;
+using AttendanceQR.Web.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
@@ -40,20 +45,56 @@ if (!Directory.Exists(dir))
 
 builder.Services.AddDbContext<AppDbContext>(o => o.UseSqlite(conn));
 
-// Auth (cookie)
-builder.Services.AddAuthentication("Cookies")
-    .AddCookie("Cookies", o =>
+builder.Services.Configure<FormOptions>(o =>
+{
+    o.MultipartBodyLengthLimit = 50 * 1024 * 1024; // 50 MB
+});
+
+
+// DI
+builder.Services.AddScoped<IQRCodeService, QRCodeService>();
+builder.Services.AddScoped<IAttendanceService, AttendanceService>();
+builder.Services.AddScoped<ISessionService, SessionService>();
+
+//// Auth (cookie)
+//builder.Services.AddAuthentication("Cookies")
+//    .AddCookie("Cookies", o =>
+//    {
+//        o.LoginPath = "/Account/Register";
+//        o.AccessDeniedPath = "/Account/Register";
+//        o.SlidingExpiration = true;
+//        o.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+//        o.Cookie.SameSite = SameSiteMode.Lax;
+//    });
+//builder.Services.AddAuthorization(o =>
+//    o.AddPolicy("LecturerOnly", p => p.RequireAuthenticatedUser().RequireRole("Lecturer")));
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(o =>
     {
         o.LoginPath = "/Account/Register";
         o.AccessDeniedPath = "/Account/Register";
         o.SlidingExpiration = true;
-        o.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-        o.Cookie.SameSite = SameSiteMode.Lax;
     });
-builder.Services.AddAuthorization(o =>
-    o.AddPolicy("LecturerOnly", p => p.RequireAuthenticatedUser().RequireRole("Lecturer")));
+//builder.Services.AddAuthorization();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("LecturerOnly",
+        p => p.RequireAuthenticatedUser().RequireRole("Lecturer"));
+});
+
+builder.Services.AddControllersWithViews(options =>
+{
+    // Require LecturerOnly everywhere by default
+    options.Filters.Add(new AuthorizeFilter("LecturerOnly"));
+});
 
 builder.Services.AddControllersWithViews();
+
+builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
+builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();     // email sender
+builder.Services.AddScoped<IRegistrationService, RegistrationService>(); // magic-link service
 
 var app = builder.Build();
 
@@ -78,7 +119,10 @@ app.UseAuthorization();
 
 // Enforce auth globally (optional) — or use [Authorize] on controllers
 // app.MapControllers().RequireAuthorization("LecturerOnly");
-app.MapDefaultControllerRoute();
+//app.MapControllers().RequireAuthorization("LecturerOnly");
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapGet("/healthz", () => Results.Ok("ok")).AllowAnonymous();
 
