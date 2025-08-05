@@ -84,11 +84,11 @@ builder.Services.AddAuthorization(options =>
         p => p.RequireAuthenticatedUser().RequireRole("Lecturer"));
 });
 
-builder.Services.AddControllersWithViews(options =>
-{
-    // Require LecturerOnly everywhere by default
-    options.Filters.Add(new AuthorizeFilter("LecturerOnly"));
-});
+//builder.Services.AddControllersWithViews(options =>
+//{
+//    // Require LecturerOnly everywhere by default
+//    options.Filters.Add(new AuthorizeFilter("LecturerOnly"));
+//});
 
 builder.Services.AddControllersWithViews();
 
